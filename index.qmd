@@ -1,0 +1,64 @@
+---
+title: "Relatório estatístico"
+format:
+   html:
+     self-contained: true
+execute:
+  echo: false
+  warning: false
+  error: false
+---
+
+```{r}
+
+# open packages
+library(readr)
+library(tidyverse)
+library(sf)
+library(rnaturalearth)
+library(leaflet)
+
+# download data
+donor <- read_csv("https://raw.githubusercontent.com/digital-guard/preserv-BR/main/data/donor.csv")
+donatedPack <- read_csv("https://raw.githubusercontent.com/digital-guard/preserv-BR/main/data/donatedPack.csv")
+volume <- read_csv2("https://addressforall.org/luis.csv")
+
+# temporary files
+iso <- c("ARG", "BRA", "CHL", "COL", "ECU", "PER", "URY", "VEN")
+aoi <- ne_countries(return = 'sf') %>% filter(iso_a3 %in% iso)
+```
+
+O Instituto AddressForAll atua em `r length(iso)` países da América Latina por meio do Projeto Digital Guard. `r length(unique(volume$donor_id))` parceiros já contribuíram para a plataforma de dados.
+
+```{r}
+
+# mapa da área de atuação
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = aoi,
+              stroke = 0,
+              fillColor = "yellow",
+              opacity = 1,
+              popup = aoi$name#,
+              #highlightOptions = highlightOptions(stroke = 1,
+              #                                    color = "black",
+              #                                    bringToFront = FALSE)
+              )
+
+```
+
+## Preservação
+
+`r length(unique(volume$pack_id))` pacotes de dados geoespaciais já foram preservados. *descrever preservação*
+
+## Filtragem
+
+Os endereços são parte fundamental da infraestrutura física-territorial de um país. Eles são necessários para a provisão de serviços básicos (eletricidade, água, correio), no planejamento e implementação de políticas públicas, assim como para o desenvolvimento do setor privado.
+
+`r volume %>% filter(shortname != "OSM" & ftname %in% c("geoaddress_full", "parcel_full")) %>% summarize(sum(quantidade_feicoes_bruta)) %>% sum() %>% format(scientific = FALSE, big.mark = ".")` endereços completos, em `r volume %>% filter(shortname != "OSM" & ftname %in% c("geoaddress_full", "parcel_full")) %>% nrow()` municípios, já estão disponíveis em formato padronizado, após aplicação da metodologia de filtragem de dados.
+
+## Consolidação
+
+Ainda não está em operação. *Falar sobre "Projeto Piloto" (Colômbia e Brasil)?*
+
+
